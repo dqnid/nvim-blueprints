@@ -1,6 +1,6 @@
-require("lfs")
+local lfs = require("lfs")
 
-function dirtree(dir)
+local function dirtree(dir)
 	assert(dir and dir ~= "", "Please pass directory parameter")
 	if string.sub(dir, -1) == "/" then
 		dir = string.sub(dir, 1, -2)
@@ -24,28 +24,28 @@ function dirtree(dir)
 	end)
 end
 
+-- TODO: accept multiple expressions and adapt the text to it
 local standard_expression = "{{__camel__}}"
 
-local function copyDirTree(origin, destiny, name)
-	lfs.mkdir(destiny)
+local function parseBlueprint(origin, destiny, name)
 	for filename, attr in dirtree(origin) do
 		print(attr.mode, filename)
 		if attr.mode == "directory" then
-			lfs.mkdir(destiny .. filename:sub(2):gsub(standard_expression, name))
+			local new_dir = destiny .. filename:gsub(origin, ""):gsub(standard_expression, name)
+			lfs.mkdir(new_dir)
 		else
-			os.execute(
-				"sed 's/"
-					.. standard_expression
-					.. "/"
-					.. name
-					.. "/g' "
-					.. filename
-					.. " > "
-					.. destiny
-					.. filename:sub(2):gsub(standard_expression, name)
-			)
+			local sed_command = "sed 's/"
+				.. standard_expression
+				.. "/"
+				.. name
+				.. "/g' "
+				.. filename
+				.. " > "
+				.. destiny
+				.. filename:gsub(origin, ""):gsub(standard_expression, name)
+			os.execute(sed_command)
 		end
 	end
 end
 
-copyDirTree(".", "../destiny", "prueba")
+parseBlueprint("../blueprints/react", "..", "alba")
