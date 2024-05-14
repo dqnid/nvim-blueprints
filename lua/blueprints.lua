@@ -4,33 +4,15 @@ local augroup = vim.api.nvim_create_augroup("Blueprints", { clear = true })
 
 local srcDir = "~/Documents/Proyectos/Training/nvim-blueprints/blueprints"
 
-local function openterm()
-	local file = vim.fn.expand("%:p")
-	print("My file is " .. file)
-	vim.cmd("vsplit | terminal")
-	local command = ':call jobsend(b:terminal_job_id, "echo hello world\\n")'
-	vim.cmd(command)
-end
-
-local function executeSed()
-	local sedCommand = "sed 's/information/stuff/g' " .. srcDir .. "/file.txt"
-	local value = os.execute(sedCommand)
-	os.execute("pwd")
-	print(value / 256) -- Return values are 256 multiples
-	vim.notify("value: " .. value, vim.log.levels.INFO)
-end
-
 local function setup()
 	vim.api.nvim_create_autocmd(
 		"VimEnter",
-		{ group = augroup, desc = "Creates a file structure with base code", once = true, callback = openterm } -- FIXME: not working
+		{ group = augroup, desc = "Creates a file structure with base code", once = true } -- FIXME: not working
 	)
 end
 
 return {
 	setup = setup,
-	openterm = openterm,
-	executeSed = executeSed,
 }
 
 -- NOTE:
@@ -38,3 +20,19 @@ return {
 --
 -- ls -LR
 -- ls -L .
+--
+-- local function openterm()
+-- 	local file = vim.fn.expand("%:p")
+-- 	print("My file is " .. file)
+-- 	vim.cmd("vsplit | terminal")
+-- 	local command = ':call jobsend(b:terminal_job_id, "echo hello world\\n")'
+-- 	vim.cmd(command)
+-- end
+--
+-- local function executeSed()
+-- 	local sedCommand = "sed 's/information/stuff/g' " .. srcDir .. "/file.txt"
+-- 	local value = os.execute(sedCommand)
+-- 	os.execute("pwd")
+-- 	print(value / 256) -- Return values are 256 multiples
+-- 	vim.notify("value: " .. value, vim.log.levels.INFO)
+-- end
