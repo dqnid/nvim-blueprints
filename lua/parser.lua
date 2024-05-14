@@ -48,4 +48,6 @@ local function parseBlueprint(origin, destiny, name)
 	end
 end
 
-parseBlueprint("../blueprints/react", "..", "alba")
+return {
+	parseBlueprint = parseBlueprint,
+}
