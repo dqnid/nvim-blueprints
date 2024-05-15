@@ -1,21 +1,24 @@
 -- This code will only be executed when is required somewhere
 
 local parser = require("./parser")
--- local augroup = vim.api.nvim_create_augroup("Blueprints", { clear = true })
---
--- local srcDir = "~/Documents/Proyectos/Training/nvim-blueprints/blueprints"
---
--- local function setup()
--- 	vim.api.nvim_create_autocmd(
--- 		"VimEnter",
--- 		{ group = augroup, desc = "Creates a file structure with base code", once = true } -- FIXME: not working
--- 	)
--- end
+local selectors = require("./selectors")
+local augroup = vim.api.nvim_create_augroup("Blueprints", { clear = true })
 
-parser.parseBlueprint("../blueprints/react", "..", "alba")
+local srcDir = "~/Documents/Proyectos/Training/nvim-blueprints/blueprints"
+
+local function setup()
+	vim.api.nvim_create_autocmd(
+		"VimEnter",
+		{ group = augroup, desc = "Creates a file structure with base code", once = true } -- FIXME: not working
+	)
+end
+
+-- parser.parseBlueprint("../blueprints/react", "..", "alba")
 
 return {
 	setup = setup,
+	createFromTemplate = parser.parseBlueprint,
+	selectTemplate = selectors.colors,
 }
 
 -- NOTE:
