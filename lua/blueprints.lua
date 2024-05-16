@@ -18,7 +18,7 @@ end
 return {
 	setup = setup,
 	createFromTemplate = parser.parseBlueprint,
-	selectTemplate = selectors.colors,
+	selectTemplate = selectors.blueprints,
 }
 
 -- NOTE:
