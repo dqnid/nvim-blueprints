@@ -13,8 +13,6 @@ local function setup()
 	)
 end
 
--- parser.parseBlueprint("../blueprints/react", "..", "alba")
-
 return {
 	setup = setup,
 	createFromTemplate = parser.parseBlueprint,

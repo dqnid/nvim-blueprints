@@ -1,8 +1,8 @@
 local function dirtree(dir)
 	assert(dir and dir ~= "", "Please pass directory parameter")
-	if string.sub(dir, -1) == "/" then
-		dir = string.sub(dir, 1, -2)
-	end
+	-- if string.sub(dir, -1) == "/" then
+	-- 	dir = string.sub(dir, 1, -2)
+	-- end
 
 	local function yieldtree(dir)
 		local popen = io.popen('ls -1 "' .. dir .. '"')
@@ -34,7 +34,7 @@ local standard_expression = "{{__camel__}}"
 local function parseBlueprint(origin, destiny, name)
 	for filename, attr in dirtree(origin) do
 		if attr.mode == "directory" then
-			local new_dir = destiny .. filename:gsub(origin, ""):gsub(standard_expression, name)
+			local new_dir = destiny .. filename:gsub(origin:gsub("%p", "%%%1"), ""):gsub(standard_expression, name)
 			os.execute("mkdir " .. new_dir)
 		else
 			local sed_command = "sed 's/"
@@ -45,13 +45,11 @@ local function parseBlueprint(origin, destiny, name)
 				.. filename
 				.. " > "
 				.. destiny
-				.. filename:gsub(origin, ""):gsub(standard_expression, name)
+				.. filename:gsub(origin:gsub("%p", "%%%1"), ""):gsub(standard_expression, name)
 			os.execute(sed_command)
 		end
 	end
 end
-
-parseBlueprint("../blueprints/react", "..", "alba")
 
 return {
 	parseBlueprint = parseBlueprint,
