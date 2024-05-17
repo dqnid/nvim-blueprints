@@ -1,6 +1,5 @@
 -- This code will only be executed when is required somewhere
 
-local parser = require("./parser")
 local selectors = require("./selectors")
 local augroup = vim.api.nvim_create_augroup("Blueprints", { clear = true })
 
@@ -13,10 +12,18 @@ local function setup()
 	)
 end
 
+local function createFromTemplate()
+	selectors.blueprints("/home/danih/Documents/Proyectos/nvim-blueprints/blueprints")
+end
+
+local function createFromTemplateTelescope()
+	selectors.blueprints("/home/danih/Documents/Proyectos/nvim-blueprints/blueprints")
+end
+
 return {
 	setup = setup,
-	createFromTemplate = parser.parseBlueprint,
-	selectTemplate = selectors.blueprints,
+	createFromTemplate = createFromTemplate,
+	createFromTemplateTelescope = createFromTemplateTelescope,
 }
 
 -- NOTE:

@@ -1,38 +1,10 @@
-local function dirtree(dir)
-	assert(dir and dir ~= "", "Please pass directory parameter")
-	-- if string.sub(dir, -1) == "/" then
-	-- 	dir = string.sub(dir, 1, -2)
-	-- end
-
-	local function yieldtree(dir)
-		local popen = io.popen('ls -1 "' .. dir .. '"')
-		if not popen then
-			return
-		end
-		for entry in popen:lines() do
-			if entry ~= "." and entry ~= ".." then
-				entry = dir .. "/" .. entry
-				local mode = (io.open(entry, "a")) and "file" or "directory"
-				local attr = { mode = mode }
-				coroutine.yield(entry, attr)
-				if mode == "directory" then
-					yieldtree(entry)
-				end
-			end
-		end
-		popen:close()
-	end
-
-	return coroutine.wrap(function()
-		yieldtree(dir)
-	end)
-end
+local files = require("./file-manager")
 
 -- TODO: accept multiple expressions and adapt the text to it
 local standard_expression = "{{__camel__}}"
 
 local function parseBlueprint(origin, destiny, name)
-	for filename, attr in dirtree(origin) do
+	for filename, attr in files.dirtree(origin) do
 		if attr.mode == "directory" then
 			local new_dir = destiny .. filename:gsub(origin:gsub("%p", "%%%1"), ""):gsub(standard_expression, name)
 			os.execute("mkdir " .. new_dir)
