@@ -1,23 +1,55 @@
 local files = require("./file-manager")
 
--- TODO: accept multiple expressions and adapt the text to it
-local standard_expression = "{{__camel__}}"
+-- TODO: accept multiple expressions on a table and loop through them
+local camel_expression = "{{__camel__}}"
+local pascal_expression = "{{__pascal__}}"
+
+-- FIXME: this return nil or name sometimes
+local function parseName(name, expression)
+	if expression == "{{__pascal__}}" then
+		local firstChar = name:sub(1, 1)
+		local rest = name:sub(2)
+		rest = rest:gsub("%u", function(c)
+			return "-" .. string.lower(c)
+		end)
+		name = firstChar .. rest
+		return name:lower():gsub(" ", "-"):gsub("%-%-", "-"):gsub("%-%-%-", "-")
+	elseif expression == "{{__camel__}}" then
+		return name:gsub("-", " ")
+			:gsub("_", " ")
+			:gsub(" (%l)", function(c)
+				return " " .. c:upper()
+			end)
+			:gsub(" ", "")
+			:gsub("^%l", string.upper)
+	else
+		return name
+	end
+end
 
 local function parseBlueprint(origin, destiny, name)
 	for filename, attr in files.dirtree(origin) do
+		local parsed_filename = filename
+			:gsub(origin:gsub("%p", "%%%1"), "")
+			:gsub(camel_expression, parseName(name, camel_expression))
+			:gsub(pascal_expression, parseName(name, pascal_expression))
 		if attr.mode == "directory" then
-			local new_dir = destiny .. filename:gsub(origin:gsub("%p", "%%%1"), ""):gsub(standard_expression, name)
-			os.execute("mkdir " .. new_dir)
+			os.execute("mkdir " .. destiny .. parsed_filename)
 		else
-			local sed_command = "sed 's/"
-				.. standard_expression
+			local sed_command = "sed -e 's/"
+				.. camel_expression
 				.. "/"
-				.. name
+				.. parseName(name, camel_expression)
+				.. "/g' "
+				.. "-e 's/"
+				.. pascal_expression
+				.. "/"
+				.. parseName(name, pascal_expression)
 				.. "/g' "
 				.. filename
 				.. " > "
 				.. destiny
-				.. filename:gsub(origin:gsub("%p", "%%%1"), ""):gsub(standard_expression, name)
+				.. parsed_filename
 			os.execute(sed_command)
 		end
 	end
