@@ -6,7 +6,7 @@ local pascal_expression = "{{__pascal__}}"
 
 -- FIXME: this return nil or name sometimes
 local function parseName(name, expression)
-	if expression == "{{__pascal__}}" then
+	if expression == pascal_expression then
 		local firstChar = name:sub(1, 1)
 		local rest = name:sub(2)
 		rest = rest:gsub("%u", function(c)
@@ -14,7 +14,7 @@ local function parseName(name, expression)
 		end)
 		name = firstChar .. rest
 		return name:lower():gsub(" ", "-"):gsub("%-%-", "-"):gsub("%-%-%-", "-")
-	elseif expression == "{{__camel__}}" then
+	elseif expression == camel_expression then
 		return name:gsub("-", " ")
 			:gsub("_", " ")
 			:gsub(" (%l)", function(c)
@@ -28,11 +28,13 @@ local function parseName(name, expression)
 end
 
 local function parseBlueprint(origin, destiny, name)
+	local camel_name = parseName(name, camel_expression)
+	local pascal_name = parseName(name, pascal_expression)
 	for filename, attr in files.dirtree(origin) do
 		local parsed_filename = filename
 			:gsub(origin:gsub("%p", "%%%1"), "")
-			:gsub(camel_expression, parseName(name, camel_expression))
-			:gsub(pascal_expression, parseName(name, pascal_expression))
+			:gsub(camel_expression, camel_name)
+			:gsub(pascal_expression, pascal_name)
 		if attr.mode == "directory" then
 			os.execute("mkdir " .. destiny .. parsed_filename)
 		else
