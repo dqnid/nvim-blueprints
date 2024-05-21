@@ -1,6 +1,5 @@
--- This code will only be executed when is required somewhere
-
 local selectors = require("./selectors")
+local parser = require("./parser")
 
 local srcDir = "/home/danih/Documents/Proyectos/nvim-blueprints/blueprints"
 vim.g.blueprintsDir = srcDir
@@ -9,8 +8,8 @@ local function setup(opts)
 	vim.g.blueprintsDir = opts.blueprintsDir
 end
 
-local function createFromTemplate()
-	selectors.blueprints(vim.g.blueprintsDir)
+local function createFromTemplate(origin, destiny, name)
+	parser.parseBlueprint(origin, destiny, name)
 end
 
 local function createFromTemplateTelescope()

@@ -4,7 +4,6 @@ local files = require("./file-manager")
 local camel_expression = "{{__camel__}}"
 local pascal_expression = "{{__pascal__}}"
 
--- FIXME: this return nil or name sometimes
 local function parseName(name, expression)
 	if expression == pascal_expression then
 		local firstChar = name:sub(1, 1)
@@ -60,29 +59,3 @@ end
 return {
 	parseBlueprint = parseBlueprint,
 }
-
--- local lfs = require("lfs")
---
--- local function dirtree(dir)
--- 	assert(dir and dir ~= "", "Please pass directory parameter")
--- 	if string.sub(dir, -1) == "/" then
--- 		dir = string.sub(dir, 1, -2)
--- 	end
---
--- 	local function yieldtree(dir)
--- 		for entry in lfs.dir(dir) do
--- 			if entry ~= "." and entry ~= ".." then
--- 				entry = dir .. "/" .. entry
--- 				local attr = lfs.attributes(entry)
--- 				coroutine.yield(entry, attr)
--- 				if attr.mode == "directory" then
--- 					yieldtree(entry)
--- 				end
--- 			end
--- 		end
--- 	end
---
--- 	return coroutine.wrap(function()
--- 		yieldtree(dir)
--- 	end)
--- end
