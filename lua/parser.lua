@@ -1,56 +1,119 @@
 local files = require("./file-manager")
 
--- TODO: accept multiple expressions on a table and loop through them
-local camel_expression = "{{__camel__}}"
-local pascal_expression = "{{__pascal__}}"
+-- MUST REMAIN IN THIS ORDER
+--  every index matches the parseName expression switch
+local filename_expressions = {
+	"__name__",
+	"__upperCase_name__",
+	"__lowerCase_name__",
+	"__camelCase_name__",
+	"__pascalCase_name__",
+	"__snakeCase_name__",
+	"__upperSnakeCase_name__",
+	"__kebabCase_name__",
+	"__lowerDotCase_name__",
+}
 
-local function parseName(name, expression)
-	if expression == pascal_expression then
-		local firstChar = name:sub(1, 1)
-		local rest = name:sub(2)
-		rest = rest:gsub("%u", function(c)
-			return "-" .. string.lower(c)
-		end)
-		name = firstChar .. rest
-		return name:lower():gsub(" ", "-"):gsub("%-%-", "-"):gsub("%-%-%-", "-")
-	elseif expression == camel_expression then
-		return name:gsub("-", " ")
-			:gsub("_", " ")
-			:gsub(" (%l)", function(c)
-				return " " .. c:upper()
+local template_expressions = {
+	"{{name}}",
+	"{{upperCase name}}",
+	"{{lowerCase name}}",
+	"{{camelCase name}}",
+	"{{pascalCase name}}",
+	"{{snakeCase name}}",
+	"{{upperSnakeCase name}}",
+	"{{kebabCase name}}",
+	"{{lowerDotCase name}}",
+}
+
+local function parseName(name, expression_index)
+	local expressions_cases = {
+		[1] = function()
+			return name
+		end,
+		[2] = function()
+			return name:upper()
+		end,
+		[3] = function()
+			return name:lower()
+		end,
+		[4] = function()
+			return name:gsub("-", " ")
+				:gsub("_", " ")
+				:gsub(" (%l)", function(c)
+					return " " .. c:upper()
+				end)
+				:gsub(" ", "")
+				:gsub("^%l", string.lower)
+		end,
+		[5] = function()
+			return name:gsub("-", " ")
+				:gsub("_", " ")
+				:gsub(" (%l)", function(c)
+					return " " .. c:upper()
+				end)
+				:gsub(" ", "")
+				:gsub("^%l", string.upper)
+		end,
+		[6] = function()
+			local firstChar = name:sub(1, 1)
+			local rest = name:sub(2)
+			rest = rest:gsub("%u", function(c)
+				return "_" .. string.lower(c)
 			end)
-			:gsub(" ", "")
-			:gsub("^%l", string.upper)
+			name = firstChar .. rest
+			return name:lower():gsub(" ", "_"):gsub("%_%_%_", "_"):gsub("%_%_", "_")
+		end,
+		[7] = function()
+			local firstChar = name:sub(1, 1)
+			local rest = name:sub(2)
+			rest = rest:gsub("%u", function(c)
+				return "_" .. string.upper(c)
+			end)
+			name = firstChar .. rest
+			return name:upper():gsub(" ", "_"):gsub("%_%_%_", "_"):gsub("%_%_", "_")
+		end,
+		[8] = function()
+			local firstChar = name:sub(1, 1)
+			local rest = name:sub(2)
+			rest = rest:gsub("%u", function(c)
+				return "-" .. string.lower(c)
+			end)
+			name = firstChar .. rest
+			return name:lower():gsub(" ", "-"):gsub("%-%-%-", "-"):gsub("%-%-", "-")
+		end,
+		[9] = function()
+			local firstChar = name:sub(1, 1)
+			local rest = name:sub(2)
+			rest = rest:gsub("%u", function(c)
+				return "." .. string.lower(c)
+			end)
+			name = firstChar .. rest
+			return name:lower():gsub(" ", "."):gsub("%.%.%.", "."):gsub("%.%.", ".")
+		end,
+	}
+	local result = expressions_cases[expression_index]
+	if result then
+		return result()
 	else
 		return name
 	end
 end
 
 local function parseBlueprint(origin, destiny, name)
-	local camel_name = parseName(name, camel_expression)
-	local pascal_name = parseName(name, pascal_expression)
 	for filename, attr in files.dirtree(origin) do
-		local parsed_filename = filename
-			:gsub(origin:gsub("%p", "%%%1"), "")
-			:gsub(camel_expression, camel_name)
-			:gsub(pascal_expression, pascal_name)
+		local parsed_filename = filename:gsub(origin:gsub("%p", "%%%1"), "")
+		for index, expression in ipairs(filename_expressions) do
+			parsed_filename = parsed_filename:gsub(expression, parseName(name, index))
+		end
 		if attr.mode == "directory" then
 			os.execute("mkdir " .. destiny .. parsed_filename)
 		else
-			local sed_command = "sed -e 's/"
-				.. camel_expression
-				.. "/"
-				.. parseName(name, camel_expression)
-				.. "/g' "
-				.. "-e 's/"
-				.. pascal_expression
-				.. "/"
-				.. parseName(name, pascal_expression)
-				.. "/g' "
-				.. filename
-				.. " > "
-				.. destiny
-				.. parsed_filename
+			local sed_command = "sed "
+			for index, expression in ipairs(template_expressions) do
+				sed_command = sed_command .. "-e 's/" .. expression .. "/" .. parseName(name, index) .. "/g' "
+			end
+			sed_command = sed_command .. filename .. " > " .. destiny .. parsed_filename
 			os.execute(sed_command)
 		end
 	end
