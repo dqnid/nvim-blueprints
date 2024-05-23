@@ -104,7 +104,8 @@ local function parseBlueprint(origin, destiny, name)
 	for filename, attr in files.dirtree(origin) do
 		local parsed_filename = filename:gsub(origin:gsub("%p", "%%%1"), "")
 		for index, expression in ipairs(filename_expressions) do
-			parsed_filename = parsed_filename:gsub(expression, parseName(name, index))
+			local parsed_name = parseName(name, index)
+			parsed_filename = parsed_filename:gsub(expression, parsed_name)
 		end
 		if attr.mode == "directory" then
 			os.execute("mkdir " .. destiny .. parsed_filename)
