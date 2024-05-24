@@ -2,6 +2,8 @@
 
 Simple plain text template manager for Neovim.
 
+![small-blueprints](https://github.com/dqnid/nvim-blueprints/assets/85947178/7ab74345-fbe4-4e2a-9519-3a88b03f58af)
+
 ## Dependencies
 
 This plugin requires basic Unix system commands, since most of the functionality supports itself on them. This way we can get rid of some `Lua` dependencies with the downside of not being Windows friendly.
