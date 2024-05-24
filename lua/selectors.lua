@@ -8,13 +8,22 @@ local conf = require("telescope.config").values
 local actions = require("telescope.actions")
 local action_state = require("telescope.actions.state")
 
+local DEFAULT_BLUEPRINTS_DIR = ".blueprints"
+
 local blueprints = function(blueprints_dir)
 	local opts = {}
 
+	local pwd = os.getenv("PWD") or io.popen("cd"):read()
+
 	local blueprint_list = {}
+
+	for filename in files.listdirs(pwd .. "/" .. DEFAULT_BLUEPRINTS_DIR) do
+		table.insert(blueprint_list, filename)
+	end
 	for filename in files.listdirs(blueprints_dir) do
 		table.insert(blueprint_list, filename)
 	end
+
 	pickers
 		.new(opts, {
 			prompt_title = "Blueprints",
@@ -26,8 +35,6 @@ local blueprints = function(blueprints_dir)
 				actions.select_default:replace(function()
 					actions.close(prompt_bufnr)
 					local selection = action_state.get_selected_entry()
-
-					local pwd = os.getenv("PWD") or io.popen("cd"):read()
 					local dir = vim.fn.input("Target: " .. pwd .. "/")
 					local name = vim.fn.input("Name: ")
 					parser.parseBlueprint(selection[1], pwd .. "/" .. dir, name)
