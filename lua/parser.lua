@@ -110,11 +110,11 @@ local function parseBlueprint(origin, destiny, name)
 		if attr.mode == "directory" then
 			os.execute('mkdir "' .. destiny .. parsed_filename .. '"')
 		else
-			local sed_command = "sed "
+			local sed_command = "sed 's/" .. template_expressions[1] .. "/" .. parseName(name, 1) .. "/g' " .. filename
 			for index, expression in ipairs(template_expressions) do
-				sed_command = sed_command .. "-e 's/" .. expression .. "/" .. parseName(name, index) .. "/g' "
+				sed_command = sed_command .. " | sed 's/" .. expression .. "/" .. parseName(name, index) .. "/g' "
 			end
-			sed_command = sed_command .. filename .. ' > "' .. destiny .. parsed_filename .. '"'
+			sed_command = sed_command .. ' > "' .. destiny .. parsed_filename .. '"'
 			os.execute(sed_command)
 		end
 	end
